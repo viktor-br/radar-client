@@ -82,6 +82,7 @@ class App extends Component {
     }
 
     updateMarker(key, position) {
+        console.log(key, position);
         let markers = this.state.markers;
         for (let i = 0; i < markers.length; i++) {
             if (markers[i].key === key) {
@@ -92,6 +93,9 @@ class App extends Component {
                 return;
             }
         }
+
+        markers.push({key, position, content: key});
+        this.setState({markers: markers});
     };
 
     render() {
