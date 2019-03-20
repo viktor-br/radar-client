@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import logo from './logo.svg';
 import './App.css';
 import LeafletMap from './LeafletMap';
 import {ApolloClient} from 'apollo-client';
@@ -46,8 +45,17 @@ const updatedSubscription = gql`
     updated {
       key
       position
+      content
     }
   }
+`;
+
+const removedSubscription = gql`
+    subscription updated {
+        removed {
+            key
+        }
+    }
 `;
 
 class App extends Component {
@@ -73,7 +81,18 @@ class App extends Component {
             query: updatedSubscription,
         }).subscribe({
             next: (data) => {
-                this.updateMarker(data.data.updated.key, data.data.updated.position);
+                this.updateMarker(data.data.updated);
+            },
+            error(value) {
+                console.log(value);
+            }
+        });
+
+        client.subscribe({
+            query: removedSubscription,
+        }).subscribe({
+            next: (data) => {
+                this.removeMarker(data.data.removed);
             },
             error(value) {
                 console.log(value);
@@ -81,12 +100,12 @@ class App extends Component {
         });
     }
 
-    updateMarker(key, position) {
-        console.log(key, position);
+    updateMarker({key, position, content}) {
         let markers = this.state.markers;
         for (let i = 0; i < markers.length; i++) {
             if (markers[i].key === key) {
                 markers[i].position = [position[0], position[1]];
+                markers[i].content = content;
 
                 this.setState({markers: markers});
 
@@ -94,9 +113,21 @@ class App extends Component {
             }
         }
 
-        markers.push({key, position, content: key});
+        markers.push({key, position, content});
         this.setState({markers: markers});
     };
+
+    removeMarker({key}) {
+        let markers = this.state.markers;
+        for (let i = 0; i < markers.length; i++) {
+            if (markers[i].key === key) {
+                markers.splice(i, 1);
+                this.setState({markers: markers});
+
+                return;
+            }
+        }
+    }
 
     render() {
         return (
