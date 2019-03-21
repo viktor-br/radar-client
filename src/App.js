@@ -9,17 +9,15 @@ import {split} from 'apollo-link';
 import {WebSocketLink} from 'apollo-link-ws';
 import {getMainDefinition} from 'apollo-utilities';
 
-const SERVER_HOST_PORT = process.env.REACT_APP_RADAR_SERVER_HOST + ':' + process.env.REACT_APP_RADAR_SERVER_PORT;
-
 const wsLink = new WebSocketLink({
-    uri: 'ws://' + SERVER_HOST_PORT + '/subscriptions',
+    uri: process.env.REACT_APP_RADAR_WS_URI,
     options: {
         reconnect: true
     }
 });
 
 const httpLink = new HttpLink({
-    uri: 'http://' + SERVER_HOST_PORT + '/graphql',
+    uri: process.env.REACT_APP_RADAR_URI,
 });
 
 const link = split(
